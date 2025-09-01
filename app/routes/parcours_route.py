@@ -4,6 +4,7 @@ from functools import wraps
 from ..db import get_db
 from ..models.parcours import Parcours
 from ..security import decode_token
+from ..config import Config
 
 bp = Blueprint("parcours", __name__)
 
@@ -11,6 +12,10 @@ bp = Blueprint("parcours", __name__)
 def require_auth(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
+        # Autoriser OPTIONS avant auth
+        if request.method == "OPTIONS":
+            return await cors_response("", 200)
+
         access = request.cookies.get("access_token")
         if not access:
             return await cors_response({"error": "Unauthorized"}, 401)
@@ -23,20 +28,17 @@ def require_auth(func):
         return await func(*args, **kwargs)
     return wrapper
 
-
-# -------- Helper CORS ----------
+# -------- CORS Helper ----------
 async def cors_response(data, status=200):
     """Ajoute les headers CORS automatiquement"""
-    if isinstance(data, dict):
-        resp = await make_response(jsonify(data), status)
-    else:
-        resp = await make_response(data, status)
-
-    resp.headers["Access-Control-Allow-Origin"] = "*"
+    if not isinstance(data, (str, bytes)):
+        data = jsonify(data)
+    resp = await make_response(data, status)
+    resp.headers["Access-Control-Allow-Origin"] = Config.FRONT_ORIGIN
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    resp.headers["Access-Control-Allow-Credentials"] = "true"
     return resp
-
 
 # -------- Routes ----------
 @bp.route("/parcours", methods=["GET", "OPTIONS"])
@@ -47,15 +49,16 @@ async def get_parcours():
     async for session in get_db():
         result = await session.execute(select(Parcours).where(Parcours.user_id == 1))
         parcours_list = result.scalars().all()
-        return await cors_response([{
-            "id": p.id,
-            "year": p.year,
-            "role": p.role,
-            "company": p.company,
-            "description": p.description,
-            "stack": p.stack.split(",") if p.stack else []
-        } for p in parcours_list])
-
+        return await cors_response([
+            {
+                "id": p.id,
+                "year": p.year,
+                "role": p.role,
+                "company": p.company,
+                "description": p.description,
+                "stack": p.stack.split(",") if p.stack else []
+            } for p in parcours_list
+        ])
 
 @bp.route("/parcours", methods=["POST", "OPTIONS"])
 @require_auth
@@ -82,7 +85,6 @@ async def create_parcours():
         await session.commit()
         return await cors_response({"message": "Parcours créé", "id": parcours.id}, 201)
 
-
 @bp.route("/parcours/<int:id>", methods=["PUT", "OPTIONS"])
 @require_auth
 async def update_parcours(id):
@@ -102,12 +104,13 @@ async def update_parcours(id):
             if k in allowed:
                 if k == "stack" and isinstance(v, list):
                     setattr(parcours, k, ",".join(v))
+                elif k == "stack" and isinstance(v, str):
+                    setattr(parcours, k, v)
                 else:
                     setattr(parcours, k, v)
 
         await session.commit()
         return await cors_response({"message": "Parcours mis à jour"})
-
 
 @bp.route("/parcours/<int:id>", methods=["DELETE", "OPTIONS"])
 @require_auth
