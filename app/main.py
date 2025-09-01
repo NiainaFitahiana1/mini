@@ -26,7 +26,7 @@ def create_app() -> Quart:
     # Blueprints
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(user_bp, url_prefix="/api")
-    # app.register_blueprint(parcours_bp, url_prefix="/parc")
+    app.register_blueprint(parcours_bp, url_prefix="/parc")
 
     return app
 
