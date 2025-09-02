@@ -5,6 +5,7 @@ from .routes.auth_routes import bp as auth_bp
 from .routes.user_routes import bp as user_bp
 from .routes.parcours_route import bp as parcours_bp
 from .routes.projets_routes import bp as projets_bp
+from .routes.services_routes import bp as services_bp
 
 
 def create_app() -> Quart:
@@ -29,6 +30,7 @@ def create_app() -> Quart:
     app.register_blueprint(user_bp, url_prefix="/api")
     app.register_blueprint(parcours_bp, url_prefix="/parc")
     app.register_blueprint(projets_bp, url_prefix="/pjt")
+    app.register_blueprint(services_bp, url_prefix="/srv")
 
     return app
 
