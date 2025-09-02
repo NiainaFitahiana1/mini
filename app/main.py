@@ -4,6 +4,7 @@ from .config import Config
 from .routes.auth_routes import bp as auth_bp
 from .routes.user_routes import bp as user_bp
 from .routes.parcours_route import bp as parcours_bp
+from .routes.projets_routes import bp as projets_bp
 
 
 def create_app() -> Quart:
@@ -27,6 +28,7 @@ def create_app() -> Quart:
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(user_bp, url_prefix="/api")
     app.register_blueprint(parcours_bp, url_prefix="/parc")
+    app.register_blueprint(projets_bp, url_prefix="/pjt")
 
     return app
 
