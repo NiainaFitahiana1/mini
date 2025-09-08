@@ -6,7 +6,7 @@ from .routes.user_routes import bp as user_bp
 from .routes.parcours_route import bp as parcours_bp
 from .routes.projets_routes import bp as projets_bp
 from .routes.services_routes import bp as services_bp
-
+from .routes.skill_route import bp as skills_bp
 
 def create_app() -> Quart:
     app = Quart(__name__)
@@ -31,6 +31,7 @@ def create_app() -> Quart:
     app.register_blueprint(parcours_bp, url_prefix="/parc")
     app.register_blueprint(projets_bp, url_prefix="/pjt")
     app.register_blueprint(services_bp, url_prefix="/srv")
+    app.register_blueprint(skills_bp, url_prefix="/skl")
 
     return app
 
