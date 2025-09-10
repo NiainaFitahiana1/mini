@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  quart-app:
+    build: .
+    container_name: quart_app
+    env_file: .env
+    volumes:
+      - ./data:/app/data  # persistance du fichier SQLite
+    ports:
+      - "5000:5000"
+    command: python3 run.py run
