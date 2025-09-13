@@ -5,7 +5,7 @@ load_dotenv()
 
 
 class Config:
-    DB_URL = os.getenv("DB", "sqlite+aiosqlite:///data.db")
+    DB_URL = os.getenv("DB", "postgresql://minibase_user:Oo2nf57Bct1F20kIZ1aZXuqnHALoM1b7@dpg-d32iokemcj7s739kbl60-a.oregon-postgres.render.com/minibase")
 
     SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
     JWT_SECRET = os.getenv("JWT_SECRET", "change-me-too")
